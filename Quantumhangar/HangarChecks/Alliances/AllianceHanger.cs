@@ -3,12 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using NLog;
-using QuantumHangar.HangarMarket;
 using QuantumHangar.Serialization;
 using QuantumHangar.Utils;
 using Sandbox.Definitions;
@@ -16,7 +14,6 @@ using Sandbox.Game.World;
 using Torch.Mod;
 using Torch.Mod.Messages;
 using VRage.Game;
-using VRage.Game.ModAPI;
 
 namespace QuantumHangar.HangarChecks
 {

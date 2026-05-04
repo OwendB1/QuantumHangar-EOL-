@@ -15,7 +15,6 @@ using Sandbox.Game.World;
 using Torch.Mod;
 using Torch.Mod.Messages;
 using VRage.Game;
-using VRage.Game.ModAPI;
 
 namespace QuantumHangar.HangarChecks
 {

@@ -125,17 +125,18 @@ namespace HangarStoreMod
         }
 
 
-        public static bool HideControls(IMyTerminalBlock block)
+        private static bool HideControls(IMyTerminalBlock block)
         {
-            if (!(block is IMyProjector projector)) return true;
+            var projector = block as IMyProjector;
+            if (projector == null) return true;
             return !projector.BlockDefinition.SubtypeName.Contains("HangarStoreBlock");
         }
 
 
-        public static bool ControlVisibility(IMyTerminalBlock block)
+        private static bool ControlVisibility(IMyTerminalBlock block)
         {
-            if (!(block is IMyProjector projector)) return false;
-            return projector.BlockDefinition.SubtypeName.Contains("HangarStoreBlock");
+            var projector = block as IMyProjector;
+            return projector != null && projector.BlockDefinition.SubtypeName.Contains("HangarStoreBlock");
         }
 
 

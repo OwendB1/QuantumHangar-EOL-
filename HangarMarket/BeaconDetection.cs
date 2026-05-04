@@ -1,19 +1,13 @@
 ﻿using Sandbox.Common.ObjectBuilders;
 using Sandbox.ModAPI;
-using Sandbox.ModAPI.Interfaces;
 using SpaceEngineers.Game.ModAPI;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Text;
 using VRage.Game.Components;
 using VRage.ObjectBuilders;
 using VRage.Game.ModAPI;
-using Sandbox.Definitions;
 using VRage.Game;
 using Sandbox.Game.EntityComponents;
-using VRage.Game.ObjectBuilders.Definitions;
-using Sandbox.ModAPI.Interfaces.Terminal;
 using VRage.ModAPI;
 
 namespace BeaconDetection

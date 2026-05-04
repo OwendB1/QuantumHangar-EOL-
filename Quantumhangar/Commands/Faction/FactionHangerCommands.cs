@@ -1,20 +1,14 @@
-﻿using System;
-using NLog.Targets;
-using QuantumHangar.HangarChecks;
+﻿using QuantumHangar.HangarChecks;
 using QuantumHangar.Utils;
 using Sandbox.Game.Entities;
 using Sandbox.Game.Entities.Character;
-using Sandbox.Game.Entities.Cube;
 using System.Collections.Generic;
-using System.Linq;
-using Sandbox.Game.World;
 using Torch.Commands;
 using Torch.Commands.Permissions;
 using Torch.Mod;
 using Torch.Mod.Messages;
 using VRage.Game;
 using VRage.Game.ModAPI;
-using VRage.GameServices;
 using VRageMath;
 
 namespace QuantumHangar.Commands

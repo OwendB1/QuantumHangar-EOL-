@@ -12,15 +12,11 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Windows.Controls;
 using Torch.Mod.Messages;
-using Torch.Mod;
 using VRage.Game;
-using VRage.Game.Factions.Definitions;
 using VRage.Game.ModAPI;
 using VRage.ObjectBuilders;
 using VRageMath;
-using static QuantumHangar.Utils.CharacterUtilities;
 
 namespace QuantumHangar
 {
