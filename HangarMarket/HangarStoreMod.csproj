@@ -6,7 +6,9 @@
     <LangVersion>6</LangVersion>
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
-
+  <PropertyGroup Condition="'$(SpaceEngineersDir)' == ''">
+    <SpaceEngineersDir>..\TorchBinaries\DedicatedServer64</SpaceEngineersDir>
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Mal.Mdk2.References" Version="2.2.7">
       <PrivateAssets>all</PrivateAssets>
