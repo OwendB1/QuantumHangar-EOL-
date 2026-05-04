@@ -1,104 +1,48 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Project Properties -->
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{336836F1-76B8-43FB-ABEB-257E299E440D}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <RootNamespace>QuantumHangar</RootNamespace>
+    <TargetFramework>net48</TargetFramework>
+    <LangVersion>latest</LangVersion>
     <AssemblyName>QuantumHangar</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <Deterministic>true</Deterministic>
-    <LangVersion>latest</LangVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>x86</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <LangVersion>latest</LangVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <RootNamespace>QuantumHangar</RootNamespace>
+    <OutputPath>bin\$(Configuration)\</OutputPath>
     <PlatformTarget>x64</PlatformTarget>
-    <DebugType>none</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <LangVersion>latest</LangVersion>
+    <Prefer32Bit>false</Prefer32Bit>
+    <UseWPF>true</UseWPF>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
+
   <PropertyGroup>
-    <StartupObject />
+    <PluginPackageName>QuantumHangar</PluginPackageName>
+    <PluginPackageDirectory>$(MSBuildProjectDirectory)\..\Build\</PluginPackageDirectory>
+    <PluginPackagePath>$(PluginPackageDirectory)$(PluginPackageName).zip</PluginPackagePath>
+    <PluginPackageStagingDirectory>$(MSBuildProjectDirectory)\obj\$(Configuration)\$(TargetFramework)\$(PluginPackageName)\package\</PluginPackageStagingDirectory>
   </PropertyGroup>
-  <PropertyGroup>
-    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
-  </PropertyGroup>
+
   <ItemGroup>
-    <None Include="App.config" />
+    <None Update="manifest.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
+
+  <!-- NuGet Package References -->
   <ItemGroup>
-    <Compile Include="AutoHangar\Autohangar.cs" />
-    <Compile Include="Commands\Alliances\AllianceHangerCommands.cs" />
-    <Compile Include="Commands\Faction\FactionHangerCommands.cs" />
-    <Compile Include="Commands\HangarCommandSystem.cs" />
-    <Compile Include="Commands\HangarAdminCommands.cs" />
-    <Compile Include="Commands\Player\HangarCommands.cs" />
-    <Compile Include="Hangar.cs" />
-    <Compile Include="HangarChecks\AdminChecks.cs" />
-    <Compile Include="HangarChecks\Alliances\AllianceChecks.cs" />
-    <Compile Include="HangarChecks\Alliances\AllianceHanger.cs" />
-    <Compile Include="HangarChecks\Faction\FactionHanger.cs" />
-    <Compile Include="HangarChecks\Faction\FactionChecks.cs" />
-    <Compile Include="HangarChecks\Player\PlayerChecks.cs" />
-    <Compile Include="HangarChecks\Player\PlayerHangar.cs" />
-    <Compile Include="Commands\HangarMarketCommands.cs" />
-    <Compile Include="HangarMarket\ClientCommunication.cs" />
-    <Compile Include="HangarMarket\HangarMarketController.cs" />
-    <Compile Include="HangarMarket\MarketListing.cs" />
-    <Compile Include="Properties\Debug.cs" />
-    <Compile Include="Serialization\GridSerializer.cs" />
-    <Compile Include="Utils\CommandCooldownChecker.cs" />
-    <Compile Include="Utils\FileLocker.cs" />
-    <Compile Include="Utils\GameEvents.cs" />
-    <Compile Include="Utils\ParallelSpawner.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Configs\SerializableData.cs" />
-    <Compile Include="Configs\Settings.cs" />
-    <Compile Include="UI\UserControlInterface.xaml.cs">
-      <DependentUpon>UserControlInterface.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Utils\CharacterUtilities.cs" />
-    <Compile Include="Utils\GridObjExtractor.cs" />
-    <Compile Include="Utils\GridUtilities.cs" />
-    <Compile Include="Utils\NexusAPI.cs" />
-    <Compile Include="Utils\PluginDependencies.cs" />
-    <Compile Include="Utils\NexusSupport.cs" />
-    <Compile Include="Utils\PreviewBoxTimer.cs" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
   </ItemGroup>
+
+  <!-- Torch and Space Engineers Assembly References -->
   <ItemGroup>
     <Reference Include="HavokWrapper">
       <HintPath>..\TorchBinaries\DedicatedServer64\HavokWrapper.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\TorchBinaries\Newtonsoft.Json.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="NLog">
       <HintPath>..\TorchBinaries\NLog.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="PresentationCore" />
-    <Reference Include="PresentationFramework" />
     <Reference Include="ProtoBuf.Net">
       <HintPath>..\TorchBinaries\DedicatedServer64\ProtoBuf.Net.dll</HintPath>
       <Private>False</Private>
@@ -131,7 +75,7 @@
       <HintPath>..\TorchBinaries\DedicatedServer64\SpaceEngineers.ObjectBuilders.XmlSerializers.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml" />
     <Reference Include="Torch">
@@ -174,27 +118,28 @@
       <HintPath>..\TorchBinaries\DedicatedServer64\VRage.Mod.Io.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="WindowsBase" />
   </ItemGroup>
-  <ItemGroup>
-    <Page Include="UI\UserControlInterface.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="manifest.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  <ItemGroup />
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
-  </PropertyGroup>
-  <Target Name="Zip" BeforeTargets="AfterBuild">
-    <MakeDir Directories="$(SolutionDir)\Build\" />
-    <ZipDirectory SourceDirectory="$(OutputPath)" DestinationFile="$(SolutionDir)\Build\$(MSBuildProjectName).zip" Overwrite="true" />
+
+  <Target Name="PackagePlugin" AfterTargets="Build">
+    <RemoveDir Directories="$(PluginPackageStagingDirectory)" />
+    <MakeDir Directories="$(PluginPackageStagingDirectory)" />
+    <MakeDir Directories="$(PluginPackageDirectory)" />
+
+    <ItemGroup>
+      <PluginPackageFiles Include="$(OutputPath)*"
+                          Exclude="$(OutputPath)*.pdb;$(OutputPath)$(PluginPackageName).zip" />
+    </ItemGroup>
+
+    <Copy
+      SourceFiles="@(PluginPackageFiles)"
+      DestinationFiles="@(PluginPackageFiles->'$(PluginPackageStagingDirectory)%(Filename)%(Extension)')"
+      SkipUnchangedFiles="false" />
+
+    <Delete Files="$(PluginPackagePath)" />
+    <ZipDirectory
+      SourceDirectory="$(PluginPackageStagingDirectory)"
+      DestinationFile="$(PluginPackagePath)"
+      Overwrite="true" />
   </Target>
+
 </Project>

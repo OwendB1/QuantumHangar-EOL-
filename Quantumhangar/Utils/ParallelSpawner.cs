@@ -1,35 +1,24 @@
 ﻿using NLog;
-using NLog.Targets.Wrappers;
-using ParallelTasks;
 using QuantumHangar.Utilities;
 using QuantumHangar.Utils;
 using Sandbox;
 using Sandbox.Common.ObjectBuilders;
 using Sandbox.Engine.Multiplayer;
-using Sandbox.Engine.Physics;
 using Sandbox.Game.Entities;
 using Sandbox.Game.GameSystems;
 using Sandbox.Game.Multiplayer;
-using Sandbox.Game.Screens.Helpers;
 using Sandbox.Game.World;
 using Sandbox.Game.World.Generator;
 using Sandbox.ModAPI;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
-using System.Windows.Controls;
-using System.Windows.Documents;
 using Torch.Commands;
-using Torch.Mod;
-using Torch.Mod.Messages;
 using VRage;
 using VRage.Game;
 using VRage.Game.Entity;
 using VRage.ModAPI;
-using VRage.Noise.Patterns;
-using VRage.Utils;
 using VRageMath;
 using static QuantumHangar.Utils.CharacterUtilities;
 
@@ -366,7 +355,7 @@ namespace QuantumHangar
             mObjectsInRange.Clear();
 
             MyProceduralWorldGenerator.Static.GetAllInSphere<MyStationCellGenerator>(inflated, mObjectsInRange);
-            mObstaclesInRange.AddRange(mObjectsInRange.Select(item4 => item4.UserData).OfType<MyStation>().Select(myStation => new BoundingBoxD(myStation.Position - MyStation.SAFEZONE_SIZE, myStation.Position + MyStation.SAFEZONE_SIZE)).Where(item => item.Contains(vector3D) != 0));
+            mObstaclesInRange.AddRange(mObjectsInRange.Select(item4 => item4.UserData).OfType<MyFactionStation>().Select(myStation => new BoundingBoxD(myStation.Position - MyFactionStation.SAFEZONE_SIZE, myStation.Position + MyFactionStation.SAFEZONE_SIZE)).Where(item => item.Contains(vector3D) != 0));
 
             mObjectsInRange.Clear();
 

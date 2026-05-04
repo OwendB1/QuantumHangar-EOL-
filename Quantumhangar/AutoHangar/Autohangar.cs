@@ -8,12 +8,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.Remoting.Contexts;
 using System.Threading.Tasks;
 using System.Timers;
 using VRage.Game;
-using VRage.Game.ModAPI;
-using VRage.Network;
 using VRageMath;
 
 namespace QuantumHangar

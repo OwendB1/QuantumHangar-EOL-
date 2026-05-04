@@ -9,7 +9,6 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Xml.Serialization;
 using VRage.Game;
 using VRage.ObjectBuilders;
 using VRage.ObjectBuilders.Private;
