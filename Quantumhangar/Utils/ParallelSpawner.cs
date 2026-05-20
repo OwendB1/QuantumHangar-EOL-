@@ -5,6 +5,7 @@ using Sandbox;
 using Sandbox.Common.ObjectBuilders;
 using Sandbox.Engine.Multiplayer;
 using Sandbox.Game.Entities;
+using Sandbox.Game.Entities.Blocks;
 using Sandbox.Game.GameSystems;
 using Sandbox.Game.Multiplayer;
 using Sandbox.Game.World;
@@ -13,6 +14,7 @@ using Sandbox.ModAPI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using Torch.Commands;
 using VRage;
@@ -26,7 +28,24 @@ namespace QuantumHangar
 {
     public class ParallelSpawner
     {
+        private class SavedProjectorProjection
+        {
+            public MyObjectBuilder_CubeGrid GridBuilder { get; }
+            public Vector3I BlockPosition { get; }
+            public List<MyObjectBuilder_CubeGrid> ProjectedGrids { get; }
+
+            public SavedProjectorProjection(MyObjectBuilder_CubeGrid gridBuilder, Vector3I blockPosition,
+                List<MyObjectBuilder_CubeGrid> projectedGrids)
+            {
+                GridBuilder = gridBuilder;
+                BlockPosition = blockPosition;
+                ProjectedGrids = projectedGrids;
+            }
+        }
+
         private static List<commandTimer> recentCommands = new List<commandTimer>();
+        private static readonly MethodInfo SendNewProjection =
+            typeof(MyProjectorBase).GetMethod("SendNewBlueprint", BindingFlags.NonPublic | BindingFlags.Instance);
 
         private class commandTimer
         {
@@ -50,6 +69,7 @@ namespace QuantumHangar
 
         private readonly IEnumerable<MyObjectBuilder_CubeGrid> _grids;
         private readonly Action<HashSet<MyCubeGrid>> _callback;
+        private readonly List<SavedProjectorProjection> _savedProjectorProjections = new List<SavedProjectorProjection>();
 
         private readonly HashSet<MyCubeGrid> _spawned;
         private readonly Chat _response;
@@ -112,8 +132,14 @@ namespace QuantumHangar
 
                 foreach (var block in cubeGrid.CubeBlocks.OfType<MyObjectBuilder_Projector>())
                 {
+                    var projectedGrids = GetProjectedGrids(block);
+                    if (projectedGrids.Count > 0)
+                    {
+                        _savedProjectorProjections.Add(new SavedProjectorProjection(cubeGrid, block.Min, projectedGrids));
+                    }
+
                     block.ProjectedGrid = null;
-                    block.ProjectedGrids?.Clear();
+                    block.ProjectedGrids = null;
                 }
             }
 
@@ -565,7 +591,39 @@ namespace QuantumHangar
             foreach (var g in _spawned)
                 MyAPIGateway.Entities.AddEntity(g, true);
 
+            RestoreProjectorProjections();
             _callback?.Invoke(_spawned);
+        }
+
+        private static List<MyObjectBuilder_CubeGrid> GetProjectedGrids(MyObjectBuilder_Projector projector)
+        {
+            if (projector.ProjectedGrids != null && projector.ProjectedGrids.Count > 0)
+                return new List<MyObjectBuilder_CubeGrid>(projector.ProjectedGrids);
+
+            if (projector.ProjectedGrid != null)
+                return new List<MyObjectBuilder_CubeGrid> { projector.ProjectedGrid };
+
+            return new List<MyObjectBuilder_CubeGrid>();
+        }
+
+        private void RestoreProjectorProjections()
+        {
+            if (_savedProjectorProjections.Count == 0 || SendNewProjection == null)
+                return;
+
+            foreach (var projectorProjection in _savedProjectorProjections)
+            {
+                var grid = _spawned.FirstOrDefault(x => x.EntityId == projectorProjection.GridBuilder.EntityId);
+                if (grid == null)
+                    continue;
+
+                var projector =
+                    grid.GetCubeBlock(projectorProjection.BlockPosition)?.FatBlock as MyProjectorBase;
+                if (projector == null)
+                    continue;
+
+                SendNewProjection.Invoke(projector, new object[] { projectorProjection.ProjectedGrids });
+            }
         }
 
 
