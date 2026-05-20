@@ -1,4 +1,5 @@
-﻿using Sandbox.Game.Entities;
+﻿using QuantumHangar;
+using Sandbox.Game.Entities;
 using System.Collections.Generic;
 using System.Linq;
 using Torch.Mod;
@@ -75,16 +76,15 @@ namespace QuantumHangar.Utils
             }
         }
 
-        public static void DisplayGridSelection(ulong target, IEnumerable<MyCubeGrid> grids,
+        public static void DisplayGridSelection(ulong target, GridStamp stamp,
             int displayFor = DefaultDisplayFor)
         {
             removeAll(target);
 
             var timer = new PreviewBoxTimer(target, displayFor);
-            var color = new Color(255, 255, 0, 10);
-            foreach (var grid in grids)
-                timer.drawobjectMessage.addOBBLinkedEntity(grid.EntityId, color, MySimpleObjectRasterizer.Wireframe,
-                    1f, 0.005f);
+            var color = new Color(255, 240, 32, 255);
+            timer.drawobjectMessage.addOBB(stamp.Box, stamp.MatrixTranslation, stamp.BoundingBox.Orientation.Forward,
+                stamp.BoundingBox.Orientation.Up, color, MySimpleObjectRasterizer.Wireframe, 1f, 0.02f);
 
             timer.display();
         }

@@ -139,7 +139,7 @@ namespace QuantumHangar.HangarChecks
                 return;
 
 
-            StageSaveConfirmation(result, saveCost);
+            StageSaveConfirmation(result, gridData, saveCost);
         }
 
         public void ConfirmSaveGrid()
@@ -192,9 +192,9 @@ namespace QuantumHangar.HangarChecks
             }
         }
 
-        private void StageSaveConfirmation(GridResult result, long saveCost)
+        private void StageSaveConfirmation(GridResult result, GridStamp gridData, long saveCost)
         {
-            PreviewBoxTimer.DisplayGridSelection(SteamId, result.Grids, PendingSaveConfirmation.TimeoutSeconds);
+            PreviewBoxTimer.DisplayGridSelection(SteamId, gridData, PendingSaveConfirmation.TimeoutSeconds);
             Hangar.SetPendingSaveConfirmation(_identityId,
                 new PendingSaveConfirmation(result.BiggestGrid.EntityId, result.GridName));
 
