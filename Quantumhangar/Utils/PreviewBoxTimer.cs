@@ -82,9 +82,13 @@ namespace QuantumHangar.Utils
             removeAll(target);
 
             var timer = new PreviewBoxTimer(target, displayFor);
-            var color = new Color(255, 240, 32, 255);
+            var color = new Color(255, 255, 96, 255);
             timer.drawobjectMessage.addOBB(stamp.Box, stamp.MatrixTranslation, stamp.BoundingBox.Orientation.Forward,
-                stamp.BoundingBox.Orientation.Up, color, MySimpleObjectRasterizer.Wireframe, 1f, 0.02f);
+                stamp.BoundingBox.Orientation.Up, color, MySimpleObjectRasterizer.Wireframe, 1.2f, 0.01f);
+
+            var drawBox = timer.drawobjectMessage.drawObjects.LastOrDefault();
+            if (drawBox != null)
+                drawBox.wireDivideRatio = 1;
 
             timer.display();
         }
