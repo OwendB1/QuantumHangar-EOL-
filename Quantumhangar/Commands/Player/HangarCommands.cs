@@ -31,6 +31,20 @@ namespace QuantumHangar.Commands
             await HangarCommandSystem.RunTaskAsync(() => user.SaveGrid(), Context);
         }
 
+        [Command("confirm", "Confirms staged save for highlighted grid")]
+        [Permission(MyPromoteLevel.None)]
+        public async void ConfirmSaveGrid()
+        {
+            if (Context.Player == null)
+            {
+                Context.Respond("This is a player only command!");
+                return;
+            }
+
+            var user = new PlayerChecks(Context);
+            await HangarCommandSystem.RunTaskAsync(() => user.ConfirmSaveGrid(), Context);
+        }
+
         [Command("list", "Lists all the grids saved in your hangar")]
         [Permission(MyPromoteLevel.None)]
         public async void ListGrids()
@@ -105,6 +119,20 @@ namespace QuantumHangar.Commands
 
             var user = new PlayerChecks(Context);
             await HangarCommandSystem.RunTaskAsync(() => user.SaveGrid(), Context);
+        }
+
+        [Command("confirm", "Confirms staged save for highlighted grid")]
+        [Permission(MyPromoteLevel.None)]
+        public async void ConfirmSaveGrid()
+        {
+            if (Context.Player == null)
+            {
+                Context.Respond("This is a player only command!");
+                return;
+            }
+
+            var user = new PlayerChecks(Context);
+            await HangarCommandSystem.RunTaskAsync(() => user.ConfirmSaveGrid(), Context);
         }
 
         [Command("list", "Lists all the grids saved in your hangar")]

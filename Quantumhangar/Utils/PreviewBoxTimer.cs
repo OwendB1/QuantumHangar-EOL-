@@ -1,7 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using Sandbox.Game.Entities;
+using System.Collections.Generic;
 using System.Linq;
 using Torch.Mod;
 using Torch.Mod.Messages;
+using VRage.Game;
+using VRageMath;
 
 namespace QuantumHangar.Utils
 {
@@ -12,15 +15,17 @@ namespace QuantumHangar.Utils
 
 
         public int timeDisplayed = 0;
-        private static int displayfor = 60; //display interferred boxes for 60 seconds
+        private const int DefaultDisplayFor = 60; //display interferred boxes for 60 seconds
+        private readonly int _displayFor;
 
         public DrawDebug drawobjectMessage;
         private ulong _target;
 
-        public PreviewBoxTimer(ulong target)
+        public PreviewBoxTimer(ulong target, int displayFor = DefaultDisplayFor)
         {
             drawobjectMessage = new DrawDebug(target.ToString());
             _target = target;
+            _displayFor = displayFor;
         }
 
         public void display()
@@ -46,7 +51,7 @@ namespace QuantumHangar.Utils
         {
             for (int i = list.Count - 1; i >= 0; i--)
             {
-                if (list[i].timeDisplayed > displayfor)
+                if (list[i].timeDisplayed > list[i]._displayFor)
                 {
                     list[i].remove();
                     list.RemoveAt(i);
@@ -70,6 +75,20 @@ namespace QuantumHangar.Utils
             }
         }
 
+        public static void DisplayGridSelection(ulong target, IEnumerable<MyCubeGrid> grids,
+            int displayFor = DefaultDisplayFor)
+        {
+            removeAll(target);
+
+            var timer = new PreviewBoxTimer(target, displayFor);
+            var color = new Color(255, 255, 0, 10);
+            foreach (var grid in grids)
+                timer.drawobjectMessage.addOBBLinkedEntity(grid.EntityId, color, MySimpleObjectRasterizer.Wireframe,
+                    1f, 0.005f);
+
+            timer.display();
+        }
+
         private void remove()
         {
             drawobjectMessage.remove = true;
@@ -82,6 +101,11 @@ namespace QuantumHangar.Utils
                 return timer._target == _target;
 
             return false;
+        }
+
+        public override int GetHashCode()
+        {
+            return _target.GetHashCode();
         }
     }
 }

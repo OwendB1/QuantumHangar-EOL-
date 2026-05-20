@@ -99,7 +99,7 @@ namespace QuantumHangar.HangarChecks
 
         }
 
-        public async void SaveGrid()
+        public void SaveGrid()
         {
             if (!PerformMainChecks(true))
                 return;
@@ -122,7 +122,7 @@ namespace QuantumHangar.HangarChecks
 
             //Calculates incoming grids data
             var gridData = result.GenerateGridStamp();
-         
+
 
             //PlayersHanger.CheckGridLimits(GridData);
 
@@ -135,15 +135,52 @@ namespace QuantumHangar.HangarChecks
                 return;
 
 
-            if (!RequireSaveCurrency(result))
+            if (!TryGetSaveCost(result, out var saveCost))
                 return;
 
 
+            StageSaveConfirmation(result, saveCost);
+        }
+
+        public void ConfirmSaveGrid()
+        {
+            if (!Hangar.TryGetPendingSaveConfirmation(_identityId, out var pendingSaveConfirmation))
+            {
+                PreviewBoxTimer.removeAll(SteamId);
+                _chat?.Respond("No staged grid found. Run !hangar save first.");
+                return;
+            }
+
+            Hangar.ClearPendingSaveConfirmation(_identityId);
+            PreviewBoxTimer.removeAll(SteamId);
+
+            if (!PerformMainChecks(true))
+                return;
+
+            if (!PlayersHanger.CheckHangarLimits())
+                return;
+
+            var result = new GridResult();
+            if (!result.GetGrids(_chat, _userCharacter, pendingSaveConfirmation.BiggestGridEntityId.ToString()))
+                return;
+
+            if (IsAnyGridInsideSafeZone(result))
+                return;
+
+            var gridData = result.GenerateGridStamp();
+            if (!PlayersHanger.ExtensiveLimitChecker(gridData))
+                return;
+
+            if (!CheckEnemyDistance(Config.LoadType, _playerPosition))
+                return;
+
+            if (!TryGetSaveCost(result, out var saveCost))
+                return;
+
+            ChargeSaveCurrency(saveCost);
             PlayersHanger.SelectedPlayerFile.FormatGridName(gridData);
 
-       
-
-            var val = await PlayersHanger.SaveGridsToFile(result, gridData.GridName);
+            var val = PlayersHanger.SaveGridsToFile(result, gridData.GridName).GetAwaiter().GetResult();
             if (val)
             {
                 PlayersHanger.SaveGridStamp(gridData);
@@ -155,16 +192,26 @@ namespace QuantumHangar.HangarChecks
             }
         }
 
-        private bool RequireSaveCurrency(GridResult result)
+        private void StageSaveConfirmation(GridResult result, long saveCost)
         {
-            //MyObjectBuilder_Definitions(MyParticlesManager)
+            PreviewBoxTimer.DisplayGridSelection(SteamId, result.Grids, PendingSaveConfirmation.TimeoutSeconds);
+            Hangar.SetPendingSaveConfirmation(_identityId,
+                new PendingSaveConfirmation(result.BiggestGrid.EntityId, result.GridName));
+
+            var costMessage = Config.RequireCurrency && saveCost > 0 ? " Cost: " + saveCost + " SC." : "";
+            _chat?.Respond("Grid staged: " + result.GridName + ". Run !hangar confirm within " +
+                          PendingSaveConfirmation.TimeoutSeconds + " secs to save highlighted grid." + costMessage);
+        }
+
+        private bool TryGetSaveCost(GridResult result, out long saveCost)
+        {
+            saveCost = 0;
             if (!Config.RequireCurrency)
             {
                 return true;
             }
             else
             {
-                long saveCost = 0;
                 switch (Config.HangarSaveCostType)
                 {
                     case CostType.BlockCount:
@@ -173,19 +220,15 @@ namespace QuantumHangar.HangarChecks
                             if (grid.GridSizeEnum == MyCubeSize.Large)
                             {
                                 if (grid.IsStatic)
-                                    //If grid is station
                                     saveCost += Convert.ToInt64(grid.BlocksCount * Config.CustomStaticGridCurrency);
                                 else
-                                    //If grid is large grid
                                     saveCost += Convert.ToInt64(grid.BlocksCount * Config.CustomLargeGridCurrency);
                             }
                             else
                             {
-                                //if its a small grid
                                 saveCost += Convert.ToInt64(grid.BlocksCount * Config.CustomSmallGridCurrency);
                             }
 
-                        //Multiply by 
                         break;
 
 
@@ -202,15 +245,12 @@ namespace QuantumHangar.HangarChecks
                             if (grid.GridSizeEnum == MyCubeSize.Large)
                             {
                                 if (grid.IsStatic)
-                                    //If grid is station
                                     saveCost += Convert.ToInt64(Config.CustomStaticGridCurrency);
                                 else
-                                    //If grid is large grid
                                     saveCost += Convert.ToInt64(Config.CustomLargeGridCurrency);
                             }
                             else
                             {
-                                //if its a small grid
                                 saveCost += Convert.ToInt64(Config.CustomSmallGridCurrency);
                             }
 
@@ -218,43 +258,21 @@ namespace QuantumHangar.HangarChecks
                 }
 
                 TryGetPlayerBalance(out var balance);
-
-
                 if (balance >= saveCost)
-                {
-                    //Check command status!
-                    var command = result.BiggestGrid.DisplayName;
-                    var confirmationCooldownMap = Hangar.ConfirmationsMap;
-                    if (confirmationCooldownMap.TryGetValue(_identityId, out var confirmationCooldown))
-                    {
-                        if (!confirmationCooldown.CheckCommandStatus(command))
-                        {
-                            //Confirmed command! Update player balance!
-                            confirmationCooldownMap.Remove(_identityId);
-                            _chat?.Respond("Confirmed! Saving grid!");
+                    return true;
 
-                            ChangeBalance(-1 * saveCost);
-                            return true;
-                        }
-                        _chat?.Respond("Saving this grid in your hangar will cost " + saveCost +
-                                      " SC. Run this command again within 30 secs to continue!");
-                        confirmationCooldown.StartCooldown(command);
-                        return false;
-                    }
-                    _chat?.Respond("Saving this grid in your hangar will cost " + saveCost +
-                                  " SC. Run this command again within 30 secs to continue!");
-                    confirmationCooldown = new CurrentCooldown();
-                    confirmationCooldown.StartCooldown(command);
-                    confirmationCooldownMap.Add(_identityId, confirmationCooldown);
-                    return false;
-                }
-                else
-                {
-                    var required = saveCost - balance;
-                    _chat?.Respond("You need an additional " + required + " SC to perform this action!");
-                    return false;
-                }
+                var required = saveCost - balance;
+                _chat?.Respond("You need an additional " + required + " SC to perform this action!");
+                return false;
             }
+        }
+
+        private void ChargeSaveCurrency(long saveCost)
+        {
+            if (!Config.RequireCurrency || saveCost <= 0)
+                return;
+
+            ChangeBalance(-1 * saveCost);
         }
 
         private bool RequireLoadCurrency(GridStamp grid)
