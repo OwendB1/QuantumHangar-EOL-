@@ -52,7 +52,7 @@ namespace QuantumHangar.Utils
         {
             for (int i = list.Count - 1; i >= 0; i--)
             {
-                if (list[i].timeDisplayed > list[i]._displayFor)
+                if (list[i].timeDisplayed >= list[i]._displayFor)
                 {
                     list[i].remove();
                     list.RemoveAt(i);
