@@ -151,9 +151,6 @@ namespace QuantumHangar.HangarChecks
                 return;
             }
 
-            Hangar.ClearPendingSaveConfirmation(_identityId);
-            PreviewBoxTimer.removeAll(SteamId);
-
             if (!PerformMainChecks(true))
                 return;
 
@@ -176,6 +173,9 @@ namespace QuantumHangar.HangarChecks
 
             if (!TryGetSaveCost(result, out var saveCost))
                 return;
+
+            Hangar.ClearPendingSaveConfirmation(_identityId);
+            PreviewBoxTimer.removeAll(SteamId);
 
             ChargeSaveCurrency(saveCost);
             PlayersHanger.SelectedPlayerFile.FormatGridName(gridData);
