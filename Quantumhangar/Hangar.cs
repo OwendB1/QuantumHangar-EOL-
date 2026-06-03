@@ -28,6 +28,9 @@ namespace QuantumHangar
         public static Dictionary<long, CurrentCooldown> ConfirmationsMap { get; } =
             new Dictionary<long, CurrentCooldown>();
 
+        public static Dictionary<long, PendingSaveConfirmation> PendingSaveConfirmations { get; } =
+            new Dictionary<long, PendingSaveConfirmation>();
+
         public TorchSessionManager TorchSession { get; private set; }
         public static bool ServerRunning { get; private set; }
 
@@ -39,6 +42,29 @@ namespace QuantumHangar
         public static MethodInfo HasAccess;
 
         public static ITorchPlugin Alliances;
+
+        public static bool TryGetPendingSaveConfirmation(long identityId, out PendingSaveConfirmation pendingSaveConfirmation)
+        {
+            if (!PendingSaveConfirmations.TryGetValue(identityId, out pendingSaveConfirmation))
+                return false;
+
+            if (!pendingSaveConfirmation.IsExpired())
+                return true;
+
+            PendingSaveConfirmations.Remove(identityId);
+            pendingSaveConfirmation = null;
+            return false;
+        }
+
+        public static void SetPendingSaveConfirmation(long identityId, PendingSaveConfirmation pendingSaveConfirmation)
+        {
+            PendingSaveConfirmations[identityId] = pendingSaveConfirmation;
+        }
+
+        public static void ClearPendingSaveConfirmation(long identityId)
+        {
+            PendingSaveConfirmations.Remove(identityId);
+        }
 
         public enum ErrorType
         {
@@ -231,6 +257,29 @@ namespace QuantumHangar
             var elapsedTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - _startTime;
 
             return elapsedTime >= 30000;
+        }
+    }
+
+    public class PendingSaveConfirmation
+    {
+        public const int TimeoutSeconds = 30;
+        private const long TimeoutMilliseconds = TimeoutSeconds * 1000;
+        private readonly long _createdAt;
+
+        public long BiggestGridEntityId { get; }
+        public string GridName { get; }
+
+        public PendingSaveConfirmation(long biggestGridEntityId, string gridName)
+        {
+            BiggestGridEntityId = biggestGridEntityId;
+            GridName = gridName;
+            _createdAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        }
+
+        public bool IsExpired()
+        {
+            var elapsedTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - _createdAt;
+            return elapsedTime >= TimeoutMilliseconds;
         }
     }
 }
