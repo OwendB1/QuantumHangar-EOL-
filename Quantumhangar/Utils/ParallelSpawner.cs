@@ -611,19 +611,40 @@ namespace QuantumHangar
             if (_savedProjectorProjections.Count == 0 || SendNewProjection == null)
                 return;
 
+            var parameters = SendNewProjection.GetParameters();
+            if (parameters.Length != 1)
+                return;
+
             foreach (var projectorProjection in _savedProjectorProjections)
             {
                 var grid = _spawned.FirstOrDefault(x => x.EntityId == projectorProjection.GridBuilder.EntityId);
                 if (grid == null)
                     continue;
 
-                var projector =
-                    grid.GetCubeBlock(projectorProjection.BlockPosition)?.FatBlock as MyProjectorBase;
+                var projector = grid.GetCubeBlock(projectorProjection.BlockPosition)?.FatBlock as MyProjectorBase;
                 if (projector == null)
                     continue;
 
-                SendNewProjection.Invoke(projector, new object[] { projectorProjection.ProjectedGrids });
+                try
+                {
+                    object arg;
+                    var paramType = parameters[0].ParameterType;
+                    if (paramType.IsArray && paramType.GetElementType() == typeof(MyObjectBuilder_CubeGrid))
+                        arg = projectorProjection.ProjectedGrids.ToArray();
+                    else
+                        arg = projectorProjection.ProjectedGrids;
+
+                    SendNewProjection.Invoke(projector, new[] { arg });
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex,
+                        "Failed to restore projector blueprint for grid {0} at {1}",
+                        grid.EntityId,
+                        projectorProjection.BlockPosition);
+                }
             }
+        }
         }
 
 
