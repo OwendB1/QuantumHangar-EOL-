@@ -645,7 +645,6 @@ namespace QuantumHangar
                 }
             }
         }
-        }
 
 
         /*  Align to gravity code.
