@@ -598,12 +598,52 @@ namespace QuantumHangar
         private static List<MyObjectBuilder_CubeGrid> GetProjectedGrids(MyObjectBuilder_Projector projector)
         {
             if (projector.ProjectedGrids != null && projector.ProjectedGrids.Count > 0)
-                return new List<MyObjectBuilder_CubeGrid>(projector.ProjectedGrids);
+                return projector.ProjectedGrids.Where(x => x != null).ToList();
 
             if (projector.ProjectedGrid != null)
                 return new List<MyObjectBuilder_CubeGrid> { projector.ProjectedGrid };
 
             return new List<MyObjectBuilder_CubeGrid>();
+        }
+
+        private static void SanitizeProjectedGridsForRestore(List<MyObjectBuilder_CubeGrid> projectedGrids)
+        {
+            if (projectedGrids == null)
+                return;
+
+            projectedGrids.RemoveAll(x => x == null);
+
+            var visited = new HashSet<MyObjectBuilder_CubeGrid>();
+            foreach (var projectedGrid in projectedGrids)
+                SanitizeProjectedGridForRestore(projectedGrid, visited);
+        }
+
+        private static void SanitizeProjectedGridForRestore(MyObjectBuilder_CubeGrid projectedGrid,
+            HashSet<MyObjectBuilder_CubeGrid> visited)
+        {
+            if (projectedGrid == null || !visited.Add(projectedGrid) || projectedGrid.CubeBlocks == null)
+                return;
+
+            foreach (var cubeBlock in projectedGrid.CubeBlocks)
+            {
+                if (cubeBlock == null)
+                    continue;
+
+                if (cubeBlock.ConstructionStockpile != null)
+                    cubeBlock.ConstructionStockpile.Items = Array.Empty<MyObjectBuilder_StockpileItem>();
+
+                if (!(cubeBlock is MyObjectBuilder_Projector projector))
+                    continue;
+
+                if (projector.ProjectedGrids != null)
+                {
+                    projector.ProjectedGrids.RemoveAll(x => x == null);
+                    foreach (var nestedProjectedGrid in projector.ProjectedGrids)
+                        SanitizeProjectedGridForRestore(nestedProjectedGrid, visited);
+                }
+
+                SanitizeProjectedGridForRestore(projector.ProjectedGrid, visited);
+            }
         }
 
         private void RestoreProjectorProjections()
@@ -627,6 +667,8 @@ namespace QuantumHangar
 
                 try
                 {
+                    SanitizeProjectedGridsForRestore(projectorProjection.ProjectedGrids);
+
                     object arg;
                     var paramType = parameters[0].ParameterType;
                     if (paramType.IsArray && paramType.GetElementType() == typeof(MyObjectBuilder_CubeGrid))
